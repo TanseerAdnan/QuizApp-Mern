@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* In your global CSS file (e.g., App.css) */
+@import-normalize;
+
+/* Or import a reset CSS file if you prefer */
+@import-reset;
