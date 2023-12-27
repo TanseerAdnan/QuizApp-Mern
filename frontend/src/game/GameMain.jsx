@@ -2,28 +2,31 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-//api endpoint is basically refers to the backend url and language = api of the language i am hitting
-const GameMain = ({language, apiEndpoint}) => {
+const GameMain = ({ language, apiEndpoint }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState('');
+  const [selectedOptions, setSelectedOptions] = useState({});
   const [score, setScore] = useState(0);
   const [percentage, setPercentage] = useState(null);
-  
-  //Fetching question through API 
+  const [showSummary, setShowSummary] = useState(false);
+
   useEffect(() => {
-   
-  
     axios
       .get(`${apiEndpoint}/${language}Q`)
       .then((response) => {
         const fetchedQuestions = response.data.questions;
+        const initialSelectedOptions = {};
+        fetchedQuestions.forEach((_, index) => {
+          initialSelectedOptions[index] = '';
+        });
+        setSelectedOptions(initialSelectedOptions);
         setQuestions(fetchedQuestions);
       })
       .catch((error) => {
         console.error('Error fetching questions:', error);
       });
   }, [apiEndpoint, language]);
+
   useEffect(() => {
     if (currentQuestionIndex >= questions.length) {
       // Game Over, save the game record and fetch the percentage
@@ -32,13 +35,35 @@ const GameMain = ({language, apiEndpoint}) => {
     }
   }, [currentQuestionIndex, questions, score]);
 
-  // Play again button logic
+  const handleOptionSelect = (option) => {
+    setSelectedOptions({
+      ...selectedOptions,
+      [currentQuestionIndex]: option,
+    });
+  };
+
+  const handleNextQuestion = () => {
+    // Check if an option is selected
+    if (!selectedOptions[currentQuestionIndex]) {
+      alert('Please choose an option before moving to the next question');
+      return;
+    }
+
+    // Check if the selected option is correct
+    if (selectedOptions[currentQuestionIndex] === questions[currentQuestionIndex].correctAnswer) {
+      setScore(score + 1);
+    }
+
+    // Move to the next question
+    setCurrentQuestionIndex(currentQuestionIndex + 1);
+  };
+
   const navigate = useNavigate();
   const homePage = () => {
-    navigate('/selectedlanguage')
-  }
+    navigate('/selectedlanguage');
+  };
 
-  //Saving the score in DB 
+  // Saving the score in DB
   const saveGameRecord = async (score) => {
     try {
       await axios.post(`${import.meta.env.VITE_BASE_URL}/storingScore`, { score });
@@ -48,7 +73,7 @@ const GameMain = ({language, apiEndpoint}) => {
     }
   };
 
-  //Fetching the percentage through API
+  // Fetching the percentage through API
   const fetchPercentage = () => {
     axios
       .get(`${import.meta.env.VITE_BASE_URL}/displayScore`)
@@ -61,17 +86,14 @@ const GameMain = ({language, apiEndpoint}) => {
       });
   };
 
-  const handleOptionSelect = (option) => {
-    setSelectedOption(option);
+  const showSummaryHandler = () => {
+    saveGameRecord(score);
+    fetchPercentage();
+    setShowSummary(true);
   };
 
-  const handleNextQuestion = () => {
-    if (selectedOption === questions[currentQuestionIndex].correctAnswer) {
-      setScore(score + 1);
-    }
-
-    setCurrentQuestionIndex(currentQuestionIndex + 1);
-    setSelectedOption('');
+  const closeSummaryHandler = () => {
+    setShowSummary(false);
   };
 
   return (
@@ -89,7 +111,7 @@ const GameMain = ({language, apiEndpoint}) => {
                   type="radio"
                   name="options"
                   value={option}
-                  checked={selectedOption === option}
+                  checked={selectedOptions[currentQuestionIndex] === option}
                   onChange={() => handleOptionSelect(option)}
                   className="mr-2"
                 />
@@ -106,21 +128,42 @@ const GameMain = ({language, apiEndpoint}) => {
         </div>
       ) : (
         <div className="bg-gray-200 p-8 rounded-lg shadow-md w-96 text-center">
-        <h2 className="text-3xl font-semibold font-mono mb-4 shadow-lg">Game Over</h2>
-        <p>Your Score: {score}/{questions.length}</p>
-        {percentage !== null && (
-          <div className="items-center text-center rounded-lg justify-between mt-4">
-            <p className='bg-green-400 font-semibold rounded-lg'>{percentage.toFixed(2)}% Player's Scored 7 or More..</p>
+          <h2 className="text-3xl font-semibold font-mono mb-4 shadow-lg">Game Over</h2>
+          <p>Your Score: {score}/{questions.length}</p>
+          {percentage !== null && (
+            <div className="items-center text-center rounded-lg justify-between mt-4">
+              <p className='bg-green-400 font-semibold rounded-lg'>{percentage.toFixed(2)}% Player's Scored 7 or More..</p>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <button
+              className='bg-green-600 mt-12 py-3 px-2 rounded hover:bg-green-700 font-semibold'
+              onClick={showSummaryHandler}
+            >
+              Show Summary
+            </button>
+            <button className='bg-red-500 mt-12 py-3 px-2 rounded hover:bg-red-600 font-semibold' onClick={homePage}>
+              Play Again
+            </button>
           </div>
-        )}
-        <div>
-          <button className='bg-red-500 mt-3 ml-48 py-3 px-2 rounded hover:bg-red-600 font-semibold' onClick={homePage}>
-            Play Again
-          </button>
+          {showSummary && (
+            <div className="summary-modal fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg  bg-white p-8 border-2 border-gray-300 rounded max-h-96 overflow-y-auto">
+              <button className="close-btn absolute top-4 hover:bg-red-600 right-4 bg-red-500 text-white px-4 py-2 rounded" onClick={closeSummaryHandler}>Close</button>
+              <h3 className="text-xl font-semibold underline font-sans mb-2">Summary:</h3>
+              {questions.map((question, index) => (
+                <div key={index} className="mb-2 font-serif">
+                  <p>{`Q${index + 1}: ${question.question}`}</p>
+                  <p>{`Your Answer: ${selectedOptions[index]}`}</p>
+                  <p>{`Correct Answer: ${question.correctAnswer}`}</p>
+                  <hr className="my-2" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
 };
+
 export default GameMain;
