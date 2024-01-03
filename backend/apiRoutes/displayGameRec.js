@@ -13,7 +13,7 @@ router.get('/',async(req,res)=>{
         const totalGames = await GameRecord.countDocuments()
 
         //Applying percentage logic
-        const percentage = (takesScoreGreaterThanSeven / totalGames)*200;
+        const percentage = (takesScoreGreaterThanSeven / totalGames)*100;
         res.json({percentage, message :"Players have scored more or equal than 7"});
 
     } catch (error) {
