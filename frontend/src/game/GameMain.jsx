@@ -173,7 +173,7 @@ const GameMain = ({ language, apiEndpoint }) => {
                 </button>
               </div>
               {showSummary && (
-                <div className="summary-modal fixed top-1/2 left-1/2 transform -translate -x-1/2 -translate-y-1/2 rounded-lg  bg-white p-8 border-2 border-gray-300 rounded max-h-96 overflow-y-auto">
+                <div className="summary-modal fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-lg  bg-white p-8 border-2 border-gray-300 rounded max-h-96 overflow-y-auto">
                   <button
                     className="close-btn absolute top-4 hover:bg-red-600 right-4 bg-red-500 text-white px-4 py-2 rounded"
                     onClick={closeSummaryHandler}
