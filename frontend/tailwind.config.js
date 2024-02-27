@@ -5,7 +5,15 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily:{
+        custom: ['','sans'],
+        poppins: ['Poppins', 'sans-serif'],
+      },
+      screens: {
+        'betterhover': {'raw': '(hover: hover)'},
+    }
+    },  
   },
   plugins: [],
 }

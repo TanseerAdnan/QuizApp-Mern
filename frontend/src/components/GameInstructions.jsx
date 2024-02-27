@@ -2,7 +2,7 @@ import React from 'react';
 
 const GameInstructions = () => {
   return (
-    <div className="bg-gray-200 p-4 rounded-lg shadow-lg">
+    <div className="bg-black-200 p-4 rounded-lg shadow-lg">
       <h2 className="text-lg font-semibold mb-2">Games Instructions</h2>
       <p>
         - Select the language in which you think you
