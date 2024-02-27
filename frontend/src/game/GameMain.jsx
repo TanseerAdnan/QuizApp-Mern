@@ -11,7 +11,6 @@ const GameMain = ({ language, apiEndpoint }) => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState({});
-  const [selectedOptions, setSelectedOptions] = useState({});
   const [score, setScore] = useState(0);
   const [percentage, setPercentage] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
@@ -31,27 +30,18 @@ const GameMain = ({ language, apiEndpoint }) => {
           initialSelectedOptions[index] = "";
         });
         setSelectedOptions(initialSelectedOptions);
-        const initialSelectedOptions = {};
-        fetchedQuestions.forEach((_, index) => {
-          initialSelectedOptions[index] = "";
-        });
-        setSelectedOptions(initialSelectedOptions);
         setQuestions(fetchedQuestions);
         setLoading(false);
         questionsLoaded.current = true; //Questions are loaded
       })
       .catch((error) => {
         console.error("Error fetching questions:", error);
-        console.error("Error fetching questions:", error);
       });
   }, [apiEndpoint, language]);
 
-
   useEffect(() => {
     if (questionsLoaded.current && currentQuestionIndex >= questions.length) {
-    if (questionsLoaded.current && currentQuestionIndex >= questions.length) {
       // Game Over, save the game record and fetch the percentage
-      saveGameRecord(scoreRef.current);
       saveGameRecord(scoreRef.current);
       fetchPercentage();
     }
@@ -111,10 +101,7 @@ const GameMain = ({ language, apiEndpoint }) => {
   const homePage = () => {
     navigate("/selectedlanguage");
   };
-    navigate("/selectedlanguage");
-  };
 
-  // Saving the score in DB
   // Saving the score in DB
   const saveGameRecord = async (score) => {
     try {
@@ -122,17 +109,11 @@ const GameMain = ({ language, apiEndpoint }) => {
         score,
       });
       console.log("Game record saved successfully");
-      await axios.post(`${import.meta.env.VITE_BASE_URL}/storingScore`, {
-        score,
-      });
-      console.log("Game record saved successfully");
     } catch (error) {
-      console.error("Failed to save game record:", error);
       console.error("Failed to save game record:", error);
     }
   };
 
-  // Fetching the percentage through API
   // Fetching the percentage through API
   const fetchPercentage = () => {
     axios
@@ -143,18 +124,13 @@ const GameMain = ({ language, apiEndpoint }) => {
       })
       .catch((error) => {
         console.error("Error fetching percentage:", error);
-        console.error("Error fetching percentage:", error);
       });
   };
 
   const showSummaryHandler = () => {
     setShowSummary(true);
-  const showSummaryHandler = () => {
-    setShowSummary(true);
   };
 
-  const closeSummaryHandler = () => {
-    setShowSummary(false);
   const closeSummaryHandler = () => {
     setShowSummary(false);
   };
@@ -276,6 +252,5 @@ const GameMain = ({ language, apiEndpoint }) => {
     </div>
   );
 };
-
 
 export default GameMain;
